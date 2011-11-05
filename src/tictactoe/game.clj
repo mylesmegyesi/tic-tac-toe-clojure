@@ -1,6 +1,8 @@
 (ns tictactoe.game
 	(:gen-class))
 
+(def board nil)
+
 (defn play []
 	(println "Hello, World!"))
 

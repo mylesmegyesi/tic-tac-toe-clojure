@@ -25,6 +25,10 @@
 			)
 		)
 
+	(defn valid-move [board index]
+		(not= nil (some (partial = index) (open-indecies board)))
+		)
+
 	(defn create-board [size]
 		(vec (repeat size (vec (repeat size (players :none)))))
 		)

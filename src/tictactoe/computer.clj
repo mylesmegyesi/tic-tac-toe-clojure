@@ -8,7 +8,7 @@
 
 (declare memoized-negamax)
 
-(defn negamax [board player alpha beta]
+(defn- negamax [board player alpha beta]
 	(let [state (game-state board)]
 		(if (not= state (game-states :playing))
 			(cond
@@ -41,10 +41,7 @@
 	(first
 		(reduce
 			(fn [x y]
-				(if (> (second x) (second y))
-					x
-					y
-					)
+				(if (> (second x) (second y)) x y )
 				)
 			(map-indexed
 				(fn [index item]

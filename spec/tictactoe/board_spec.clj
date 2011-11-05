@@ -134,6 +134,25 @@
 		(should= 3 (row-size (create-board 3)))
 		)
 
+	(it "open indecies returns all indecies for an empty board"
+		(should= 9 (count (open-indecies (create-board 3))))
+		)
+
+	(it "open indecies returns nothing for a full board"
+		(should= 0 (count (open-indecies (fill-row (fill-row (fill-row (create-board 3) 0 (players :p1)) 1 (players :p1)) 2 (players :p1)))))
+		)
+
+	(it "open indecies returns only row 1 column 1"
+		(should= [[0 0]] (open-indecies (assoc-in (fill-row (fill-row (fill-row (create-board 3) 0 (players :p1)) 1 (players :p1)) 2 (players :p1)) [0 0] (players :none))))
+		)
+
+	(it "valid move returns true for an empty space"
+		(should (valid-move (create-board 3) [0 0]))
+		)
+
+	(it "valid move returns false for an occupied space"
+		(should-not (valid-move (assoc-in (create-board 3) [0 0] (players :p2)) [0 0]))
+		)
 	)
 
 (run-specs)
