@@ -129,6 +129,11 @@
 			(should (every? equal-to-player1 [(get (get board 0) 2), (get (get board 1) 1), (get (get board 2) 0)]))
 			)
 		)
+
+	(it "row size returns the square root of the board"
+		(should= 3 (row-size (create-board 3)))
+		)
+
 	)
 
 (run-specs)

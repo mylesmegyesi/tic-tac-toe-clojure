@@ -51,7 +51,7 @@
 	)
 
 (defn- board-full? [board]
-	(every? #(every? (partial not= (players :none)) %1) board)
+	(= 0 (count (open-indecies board)))
 	)
 
 (defn game-state [board]
