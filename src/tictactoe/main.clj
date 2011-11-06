@@ -4,3 +4,5 @@
 
 (defn -main [& args]
 	(play))
+
+(play)

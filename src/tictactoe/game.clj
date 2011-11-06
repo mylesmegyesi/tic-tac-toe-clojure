@@ -1,5 +1,4 @@
 (ns tictactoe.game
-	(:gen-class)
 	(:use
 		[tictactoe.computer]
 		[tictactoe.user]
@@ -62,6 +61,3 @@
 			)
 		)
 	)
-
-(defn -main [& args]
-	(play))
