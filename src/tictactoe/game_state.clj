@@ -5,6 +5,16 @@
 
 (def game-states {:playing 0, :player1-won 1, :player2-won 2, :draw 3})
 
+(defn print-state [state]
+	(if (= state (game-states :player1-won))
+		(println "Player 1 has won!")
+		(if (= state (game-states :player2-won))
+			(println "Player 2 has won!")
+			(println "Draw!")
+			)
+		)
+	)
+
 (defn- player-won-row [board player]
 	(some #(every? (partial = player) %1) board)
 	)

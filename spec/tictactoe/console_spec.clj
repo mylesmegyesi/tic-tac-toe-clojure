@@ -7,7 +7,7 @@
 
 	(it "get int repeats until an integer is given"
 		(with-in-str (apply str (interleave '("m" 0) (repeat "\n")))
-			(should= 0 (get-int ""))
+			(should= 0 (binding [println mock-print print mock-print] (get-int "")))
 			)
 		)
 
@@ -25,19 +25,19 @@
 
 	(it "get index repeats until an index is given"
 		(with-in-str (apply str (interleave '("m" "1 1") (repeat "\n")))
-			(should= [0 0] (get-index ""))
+			(should= [0 0] (binding [println mock-print print mock-print] (get-index "")))
 			)
 		)
 
 	(it "get index won't accept anything except two integers"
 		(with-in-str (apply str (interleave '("m" "m m" "m 0" "0 m" "1 1") (repeat "\n")))
-			(should= [0 0] (get-index ""))
+			(should= [0 0] (binding [println mock-print print mock-print] (get-index "")))
 			)
 		)
 
 	(it "get index will accept two integers with variable space in between them"
 		(with-in-str (apply str (interleave '("1   1") (repeat "\n")))
-			(should= [0 0] (get-index ""))
+			(should= [0 0] (binding [println mock-print print mock-print] (get-index "")))
 			)
 		)
 

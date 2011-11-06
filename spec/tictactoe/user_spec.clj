@@ -6,19 +6,17 @@
 		[tictactoe.board]
 		[tictactoe.players]))
 
-(defn- fake-print [& args])
-
 (describe "user"
 
 	(it "only accepts moves that are on the board"
 		(with-in-str (apply str (interleave '("0 0" "10 10" "11 11" "1 1") (repeat "\n")))
-			(should= [0 0] (binding [println fake-print print fake-print] (get-user-move (create-board 3) 0)))
+			(should= [0 0] (binding [println mock-print print mock-print] (get-user-move (create-board 3) 0)))
 			)
 		)
 
 	(it "only accepts indecies that aren't occupied"
 		(with-in-str (apply str (interleave '("1 1" "1 2") (repeat "\n")))
-			(should= [0 1] (binding [println fake-print print fake-print] (get-user-move (assoc-in (create-board 3) [0 0] (players :p1)) 0)))
+			(should= [0 1] (binding [println mock-print print mock-print] (get-user-move (assoc-in (create-board 3) [0 0] (players :p1)) 0)))
 			)
 		)
 
