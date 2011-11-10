@@ -257,7 +257,7 @@
 
 (declare get-computer-move)
 (defn get-computer-move-build [game-state-fn player board]
-	(get-computer-move-forward-smartest player board game-state-fn)
+	(get-computer-move-forward-smartest game-state-fn player board)
 	)
 (def get-computer-move (memoize get-computer-move-build))
 
