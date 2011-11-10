@@ -2,7 +2,8 @@
 	(:use
 		[tictactoe.board]
 		[tictactoe.game-state]
-		[tictactoe.players]))
+		[tictactoe.players]
+		[tictactoe.console]))
 
 (def scores {:draw 0 :win 1000 :lose -1000})
 
@@ -16,6 +17,23 @@
 		)
 	)
 
+(defn- fluxuating-max [score alpha]
+  (if (not= 5 (int (* 5 (Math/random))))
+    (max score alpha)
+    (min score alpha)
+    )
+  )
+
+(defn- forward-stupid [player board game-state-fn]
+	(let [state (game-state-fn board)]
+		(if (not= state (game-states :playing))
+			(* -1 (get-state-score player state))
+			(loop [alpha (scores :lose) open-spaces (open-indecies board)]
+				(if (empty? open-spaces)
+					(* -1 alpha)
+					(let [score (forward-stupid (get-other-player player) (assoc-in board (first open-spaces) player) game-state-fn)]
+						(recur (fluxuating-max score alpha) (rest open-spaces))))))))
+
 (declare forward)
 (defn- forward-build [player board game-state-fn]
 	(let [state (game-state-fn board)]
@@ -25,32 +43,8 @@
 				(if (empty? open-spaces)
 					(* -1 alpha)
 					(let [score (forward (get-other-player player) (assoc-in board (first open-spaces) player) game-state-fn)]
-						(recur (max score alpha) (rest open-spaces))
-						)
-					)
-				)
-			)
-		)
-	)
+						(recur (max score alpha) (rest open-spaces))))))))
 (def forward (memoize forward-build))
-
-(declare forward-with-depth-heuristic)
-(defn- forward-with-depth-heuristic-build [player board game-state-fn depth]
-	(let [state (game-state-fn board)]
-		(if (not= state (game-states :playing))
-			(* -1 (+ (get-state-score player state) depth))
-			(loop [alpha (scores :lose) open-spaces (open-indecies board)]
-				(if (empty? open-spaces)
-					(* -1 alpha)
-					(let [score (forward-with-depth-heuristic (get-other-player player) (assoc-in board (first open-spaces) player) game-state-fn (inc depth))]
-						(recur (max score alpha) (rest open-spaces))
-						)
-					)
-				)
-			)
-		)
-	)
-(def forward-with-depth-heuristic (memoize forward-with-depth-heuristic-build))
 
 (declare forward-with-depth-heuristic-and-pruning)
 (defn- forward-with-depth-heuristic-and-pruning-build [player board alpha beta game-state-fn depth]
@@ -159,7 +153,7 @@
 		)
 	)
 
-(defn get-computer-move-forward [player board check-quadrants]
+(defn get-computer-move-forward-stupid [game-state-fn player board]
 	(first
 		(reduce
 			(fn [x y]
@@ -168,7 +162,7 @@
 			(map
 				(fn [index]
 					(let [new-board (assoc-in board index player)]
-						[index (forward (get-other-player player) new-board (fn [board] (game-state board check-quadrants)))]
+						[index (forward-stupid (get-other-player player) new-board game-state-fn)]
 						)
 					)
 				(open-indecies board))
@@ -176,7 +170,7 @@
 		)
 	)
 
-(defn get-computer-move-forward-depth [player board check-quadrants]
+(defn get-computer-move-forward-smart [game-state-fn player board]
 	(first
 		(reduce
 			(fn [x y]
@@ -185,7 +179,7 @@
 			(map
 				(fn [index]
 					(let [new-board (assoc-in board index player)]
-						[index (forward-with-depth-heuristic (get-other-player player) new-board (fn [board] (game-state board check-quadrants)) 0)]
+						[index (forward (get-other-player player) new-board game-state-fn)]
 						)
 					)
 				(open-indecies board))
@@ -193,7 +187,7 @@
 		)
 	)
 
-(defn get-computer-move-forward-depth-pruning [player board check-quadrants]
+(defn get-computer-move-forward-smartest [game-state-fn player board]
 	(first
 		(reduce
 			(fn [x y]
@@ -202,7 +196,7 @@
 			(map
 				(fn [index]
 					(let [new-board (assoc-in board index player)]
-						[index (forward-with-depth-heuristic-and-pruning (get-other-player player) new-board Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY (fn [board] (game-state board check-quadrants)) 0)]
+						[index (forward-with-depth-heuristic-and-pruning (get-other-player player) new-board Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY game-state-fn 0)]
 						)
 					)
 				(open-indecies board))
@@ -210,7 +204,7 @@
 		)
 	)
 
-(defn get-computer-move-tail [player board check-quadrants]
+(defn get-computer-move-tail [game-state-fn player board]
 	(first
 		(reduce
 			(fn [x y]
@@ -219,7 +213,7 @@
 			(map
 				(fn [index]
 					(let [new-board (assoc-in board index player)]
-						[index (tail (get-other-player player) (BoardTree. new-board nil (open-indecies new-board) Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY) (fn [board] (game-state board check-quadrants)))]
+						[index (tail (get-other-player player) (BoardTree. new-board nil (open-indecies new-board) Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY) game-state-fn)]
 						)
 					)
 				(open-indecies board))
@@ -227,7 +221,7 @@
 		)
 	)
 
-(defn get-computer-move-tail-depth [player board check-quadrants]
+(defn get-computer-move-tail-depth [game-state-fn player board]
 	(first
 		(reduce
 			(fn [x y]
@@ -236,7 +230,7 @@
 			(map
 				(fn [index]
 					(let [new-board (assoc-in board index player)]
-						[index (tail-with-depth-heuristic (get-other-player player) (BoardTree. new-board nil (open-indecies new-board) Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY) (fn [board] (game-state board check-quadrants)) 0)]
+						[index (tail-with-depth-heuristic (get-other-player player) (BoardTree. new-board nil (open-indecies new-board) Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY) game-state-fn 0)]
 						)
 					)
 				(open-indecies board))
@@ -244,7 +238,7 @@
 		)
 	)
 
-(defn get-computer-move-tail-depth-pruning [player board check-quadrants]
+(defn get-computer-move-tail-depth-pruning [game-state-fn player board]
 	(first
 		(reduce
 			(fn [x y]
@@ -253,7 +247,7 @@
 			(map
 				(fn [index]
 					(let [new-board (assoc-in board index player)]
-						[index (tail-with-depth-heuristic-and-pruning (get-other-player player) (BoardTree. new-board nil (open-indecies new-board) Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY) (fn [board] (game-state board check-quadrants)) 0)]
+						[index (tail-with-depth-heuristic-and-pruning (get-other-player player) (BoardTree. new-board nil (open-indecies new-board) Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY) game-state-fn 0)]
 						)
 					)
 				(open-indecies board))
@@ -262,7 +256,40 @@
 	)
 
 (declare get-computer-move)
-(defn get-computer-move-build [player board check-quadrants]
-	(get-computer-move-forward-depth-pruning player board check-quadrants)
+(defn get-computer-move-build [game-state-fn player board]
+	(get-computer-move-forward-smartest player board game-state-fn)
 	)
 (def get-computer-move (memoize get-computer-move-build))
+
+(def computer-types
+	{1 {:fn get-computer-move-forward-stupid :name "Not so smart"}
+	  2 {:fn get-computer-move-forward-smart :name "Smarter"}
+    3 {:fn get-computer-move-forward-smartest :name "Smartest"}
+    }
+	)
+
+(defn- display-computer-types []
+	(println "These are the available computer types,")
+	(doseq [keyval computer-types]
+		(println (str (key keyval) ". " ((val keyval) :name)))
+		)
+	)
+
+(defn get-computer-mover [game-state-fn player]
+	(display-computer-types)
+	(print "Please enter the level you would like the" (get-player-name player) "computer to play at: ")
+	(flush)
+	(let [error-message "That is not a valid computer type, please try again."]
+	 	(loop []
+			(let [computer-type (get-int error-message)]
+				(if (contains? computer-types computer-type)
+					(partial ((computer-types computer-type) :fn) game-state-fn)
+					(do
+						(println error-message)
+						(recur)
+						)
+					)
+				)
+			)
+		)
+	)

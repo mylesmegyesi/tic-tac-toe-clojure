@@ -4,7 +4,7 @@
 		[tictactoe.players]
 		[tictactoe.console]))
 
-(defn get-user-move [player board check-quadrants]
+(defn get-user-move [player board]
 	(print (str (get-player-name player) ", please enter your move (ex: 1 1, for row 1 column 1): "))
 	(flush)
 	(loop []
@@ -21,3 +21,7 @@
 			)
 		)
 	)
+
+(defn get-user-mover [game-state-fn player]
+  get-user-move
+  )

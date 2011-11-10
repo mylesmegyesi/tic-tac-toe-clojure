@@ -4,19 +4,20 @@
 		[tictactoe.user]
 		[tictactoe.console]
 		[tictactoe.board]
-		[tictactoe.players]))
+		[tictactoe.players]
+		[tictactoe.game-state]))
 
 (describe "user"
 
 	(it "only accepts moves that are on the board"
 		(with-in-str (apply str (interleave '("0 0" "10 10" "11 11" "1 1") (repeat "\n")))
-			(should= [0 0] (binding [println mock-print print mock-print] (get-user-move 0 (create-board 3) false	)))
+			(should= [0 0] (binding [println mock-print print mock-print] (get-user-move 0 (create-board 3))))
 			)
 		)
 
 	(it "only accepts indecies that aren't occupied"
 		(with-in-str (apply str (interleave '("1 1" "1 2") (repeat "\n")))
-			(should= [0 1] (binding [println mock-print print mock-print] (get-user-move 0 (assoc-in (create-board 3) [0 0] (players :p1)) false)))
+			(should= [0 1] (binding [println mock-print print mock-print] (get-user-move 0 (assoc-in (create-board 3) [0 0] (players :p1)))))
 			)
 		)
 

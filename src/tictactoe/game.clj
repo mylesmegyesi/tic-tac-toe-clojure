@@ -8,10 +8,10 @@
 		[tictactoe.game-state]))
 
 (def game-types
-	{1 {(players :p1) get-user-move, (players :p2) get-user-move, :name "Human vs. Human"}
-		2 {(players :p1) get-user-move, (players :p2) get-computer-move, :name "Human vs. Computer"}
-		3 {(players :p1) get-computer-move, (players :p2) get-user-move, :name "Computer vs. Human"}
-		4 {(players :p1) get-computer-move, (players :p2) get-computer-move, :name "Computer vs. Computer"}}
+	{1 {(players :p1) get-user-mover, (players :p2) get-user-mover, :name "Human vs. Human"}
+		2 {(players :p1) get-user-mover, (players :p2) get-computer-mover, :name "Human vs. Computer"}
+		3 {(players :p1) get-computer-mover, (players :p2) get-user-mover, :name "Computer vs. Human"}
+		4 {(players :p1) get-computer-mover, (players :p2) get-computer-mover, :name "Computer vs. Computer"}}
 	)
 
 (defn- display-game-types []
@@ -44,8 +44,13 @@
 	(game-types (get-game-type))
 	)
 
-(defn- get-move [player-movers player board check-quadrants]
-	((player-movers player) player board check-quadrants)
+(defn- get-player-movers [game-type game-state-fn]
+  {(players :p1) ((game-type (players :p1)) game-state-fn (players :p1))
+    (players :p2) ((game-type (players :p2)) game-state-fn (players :p2))}
+  )
+
+(defn- get-move [player-movers player board]
+	((player-movers player) player board)
 	)
 
 (defn- get-check-quadrants-option []
@@ -58,13 +63,13 @@
 
 (defn play []
 	(println "Welcome to Tic-Tac-Toe!")
-	(let [player-movers (get-players) check-quadrants (get-check-quadrants-option)]
+	(let [check-quadrants (get-check-quadrants-option) game-state-fn (fn [board] (game-state board check-quadrants)) player-movers (get-player-movers (get-players) game-state-fn)]
 		(loop [board (get-board) current (players :p1) next (players :p2)]
 			(print-board board)
-			(let [state (game-state board check-quadrants)]
+			(let [state (game-state-fn board)]
 				(if (not= (game-states :playing) state)
 					(print-state state)
-					(recur (assoc-in board (get-move player-movers current board check-quadrants) current) next current)
+					(recur (assoc-in board (get-move player-movers current board) current) next current)
 					)
 				)
 			)
