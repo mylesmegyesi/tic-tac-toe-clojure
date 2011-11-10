@@ -275,15 +275,15 @@
 		)
 	)
 
-(defn get-computer-mover [game-state-fn player]
-	(display-computer-types)
+(defn get-computer-type [player]
+  (display-computer-types)
 	(print "Please enter the level you would like the" (get-player-name player) "computer to play at: ")
 	(flush)
 	(let [error-message "That is not a valid computer type, please try again."]
 	 	(loop []
 			(let [computer-type (get-int error-message)]
 				(if (contains? computer-types computer-type)
-					(partial ((computer-types computer-type) :fn) game-state-fn)
+				  computer-type
 					(do
 						(println error-message)
 						(recur)
@@ -292,4 +292,8 @@
 				)
 			)
 		)
+  )
+
+(defn get-computer-mover [game-state-fn player]
+  (partial ((computer-types (get-computer-type player)) :fn) game-state-fn)
 	)
