@@ -2,7 +2,8 @@
   (:use
     [speclj.core]
     [tictactoe.board]
-		[tictactoe.players]))
+		[tictactoe.players]
+		[tictactoe.console]))
 
 (defn equal-to-player1 [x]
 	(= x (players :p1))
@@ -152,6 +153,18 @@
 
 	(it "valid move returns false for an occupied space"
 		(should-not (valid-move (assoc-in (create-board 3) [0 0] (players :p2)) [0 0]))
+		)
+
+	(it "get board size gets an number greater than or equal to three"
+		(with-in-str (apply str (interleave '(-1 0 1 2 3) (repeat "\n")))
+			(should= 3 (binding [println mock-print print mock-print] (get-board-size)))
+			)
+		)
+
+	(it "get board size gets an number less than or equal to the max board size"
+		(with-in-str (apply str (interleave (list 5 6 7 4) (repeat "\n")))
+			(should= 4 (binding [println mock-print print mock-print] (get-board-size)))
+			)
 		)
 	)
 

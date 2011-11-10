@@ -6,28 +6,95 @@
 
 (def scores {:draw 0 :win 1000 :lose -1000})
 
-(declare memoized-negamax)
+(defrecord BoardTree [board parent children alpha beta])
 
-(defn- negamax [board player alpha beta]
-	(let [state (game-state board)]
+(defn- get-state-score [player game-state]
+	(cond
+		(= game-state (game-states :player1-won)) (if (= player (players :p1)) (scores :win) (scores :lose))
+		(= game-state (game-states :player2-won)) (if (= player (players :p2)) (scores :win) (scores :lose))
+		:else (scores :draw)
+		)
+	)
+
+(declare forward)
+(defn- forward-build [player board game-state-fn]
+	(let [state (game-state-fn board)]
 		(if (not= state (game-states :playing))
-			(cond
-				(= state (game-states :player1-won)) (if (= player (players :p1)) (scores :win) (scores :lose))
-				(= state (game-states :player2-won)) (if (= player (players :p2)) (scores :win) (scores :lose))
-				:else (scores :draw)
+			(* -1 (get-state-score player state))
+			(loop [alpha (scores :lose) open-spaces (open-indecies board)]
+				(if (empty? open-spaces)
+					(* -1 alpha)
+					(let [score (forward (get-other-player player) (assoc-in board (first open-spaces) player) game-state-fn)]
+						(recur (max score alpha) (rest open-spaces))
+						)
+					)
 				)
-			(let [open-spaces (open-indecies board)]
-				(loop [alpha alpha i 0 end (count open-spaces)]
-					(if (= i end)
-						(+ alpha 1)
-						(let [score (* -1 (memoized-negamax (assoc-in board (get open-spaces i) player) (get-other-player player) (* -1 beta) (* -1 alpha)))]
-							(let [new-alpha (max score alpha)]
-								(if (>= new-alpha beta)
-									(+ new-alpha 1)
-									(recur new-alpha (inc i) end)
-									)
-								)
-							)
+			)
+		)
+	)
+(def forward (memoize forward-build))
+
+(declare forward-with-depth-heuristic)
+(defn- forward-with-depth-heuristic-build [player board game-state-fn depth]
+	(let [state (game-state-fn board)]
+		(if (not= state (game-states :playing))
+			(* -1 (+ (get-state-score player state) depth))
+			(loop [alpha (scores :lose) open-spaces (open-indecies board)]
+				(if (empty? open-spaces)
+					(* -1 alpha)
+					(let [score (forward-with-depth-heuristic (get-other-player player) (assoc-in board (first open-spaces) player) game-state-fn (inc depth))]
+						(recur (max score alpha) (rest open-spaces))
+						)
+					)
+				)
+			)
+		)
+	)
+(def forward-with-depth-heuristic (memoize forward-with-depth-heuristic-build))
+
+(declare forward-with-depth-heuristic-and-pruning)
+(defn- forward-with-depth-heuristic-and-pruning-build [player board alpha beta game-state-fn depth]
+	(let [state (game-state-fn board)]
+		(if (not= state (game-states :playing))
+			(* -1 (+ (get-state-score player state) depth))
+			(loop [alpha alpha open-spaces (open-indecies board)]
+				(if (or (empty? open-spaces) (>= alpha beta))
+					(* -1 alpha)
+					(let [score (forward-with-depth-heuristic-and-pruning (get-other-player player) (assoc-in board (first open-spaces) player) (* -1 beta) (* -1 alpha) game-state-fn (inc depth))]
+						(recur (max score alpha) (rest open-spaces))
+						)
+					)
+				)
+			)
+		)
+	)
+(def forward-with-depth-heuristic-and-pruning (memoize forward-with-depth-heuristic-and-pruning-build))
+
+(defn- get-parent-with-max [node heuristic]
+	(if (> heuristic (-> node :parent :alpha))
+		(:parent (assoc-in node [:parent :alpha] heuristic))
+		(:parent node)
+		)
+	)
+
+(defn- tail [player current-node game-state-fn]
+	(if (and (= nil (:parent current-node)) (= 0 (count (:children current-node))))
+		;base case
+		(* -1 (:alpha current-node))
+		(let [state (game-state-fn (:board current-node))]
+			;determine if this is a leaf node
+			(if (not= state (game-states :playing))
+				;leaf node
+				(if (= nil (:parent current-node)) ;it's a leaf and a root
+					(* -1 (get-state-score player state))
+					(recur (get-other-player player) (get-parent-with-max current-node (* -1 (get-state-score player state))) game-state-fn)
+					)
+				(if (empty? (:children current-node))
+					;return from child to the parent
+					(recur (get-other-player player) (get-parent-with-max current-node (* -1 (:alpha current-node))) game-state-fn)
+					;create a new child board and take the child out of the parent's list of children (a.k.a. marking it as visited)
+					(let [new-board (assoc-in (:board current-node) (first (:children current-node)) player) old-board (update-in current-node [:children] rest)]
+						(recur (get-other-player player) (BoardTree. new-board old-board (open-indecies new-board) Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY) game-state-fn)
 						)
 					)
 				)
@@ -35,19 +102,167 @@
 		)
 	)
 
-(def memoized-negamax (memoize negamax))
+(defn- tail-with-depth-heuristic [player current-node game-state-fn depth]
+	(if (and (= nil (:parent current-node)) (= 0 (count (:children current-node))))
+		;base case
+		(* -1 (+ (:alpha current-node) depth))
+		(let [state (game-state-fn (:board current-node))]
+			;determine if this is a leaf node
+			(if (not= state (game-states :playing))
+				;leaf node
+				(if (= nil (:parent current-node)) ;it's a leaf and a root
+					(* -1 (+ (get-state-score player state) depth))
+					(recur (get-other-player player) (get-parent-with-max current-node (* -1 (+ (get-state-score player state) depth))) game-state-fn (dec depth))
+					)
+				(if (empty? (:children current-node))
+					;return from child to the parent
+					(recur (get-other-player player) (get-parent-with-max current-node (* -1 (:alpha current-node))) game-state-fn (dec depth))
+					;create a new child board and take the child out of the parent's list of children (a.k.a. marking it as visited)
+					(let [new-board (assoc-in (:board current-node) (first (:children current-node)) player) old-board (update-in current-node [:children] rest)]
+						(recur (get-other-player player) (BoardTree. new-board old-board (open-indecies new-board) Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY) game-state-fn (inc depth))
+						)
+					)
+				)
+			)
+		)
+	)
 
-(defn get-computer-move [board player]
+(defn- tail-with-depth-heuristic-and-pruning [player current-node game-state-fn depth]
+	(if (and (= nil (:parent current-node)) (= 0 (count (:children current-node))))
+		;base case
+		(* -1 (+ (:alpha current-node) depth))
+		(let [state (game-state-fn (:board current-node))]
+			;determine if this is a leaf node
+			(if (not= state (game-states :playing))
+				;leaf node
+				(if (= nil (:parent current-node)) ;it's a leaf and a root
+					(* -1 (+ (get-state-score player state) depth))
+					;prune the tree
+					(let [parent (get-parent-with-max current-node (* -1 (+ (get-state-score player state) depth)))]
+						(if (>= (:alpha parent) (:beta parent))
+							; prune the children from the parent if alpha is greater than beta
+							(recur (get-other-player player) (assoc-in parent [:children] (empty (:children parent))) game-state-fn (dec depth))
+							(recur (get-other-player player) parent game-state-fn (dec depth))
+							)
+						)
+					)
+				(if (empty? (:children current-node))
+					;return from child to the parent
+					(recur (get-other-player player) (get-parent-with-max current-node (* -1 (:alpha current-node))) game-state-fn (dec depth))
+					;create a new child board and take the child out of the parent's list of children (a.k.a. marking it as visited)
+					(let [new-board (assoc-in (:board current-node) (first (:children current-node)) player) old-board (update-in current-node [:children] rest)]
+						(recur (get-other-player player) (BoardTree. new-board old-board (open-indecies new-board) (* -1 (:beta old-board)) (* -1 (:alpha old-board))) game-state-fn (inc depth))
+						)
+					)
+				)
+			)
+		)
+	)
+
+(defn get-computer-move-forward [player board check-quadrants]
 	(first
 		(reduce
 			(fn [x y]
 				(if (> (second x) (second y)) x y )
 				)
-			(map-indexed
-				(fn [index item]
-					[item (* -1 (memoized-negamax (assoc-in board item player) (get-other-player player) (scores :lose) (scores :win)))]
+			(map
+				(fn [index]
+					(let [new-board (assoc-in board index player)]
+						[index (forward (get-other-player player) new-board (fn [board] (game-state board check-quadrants)))]
+						)
 					)
 				(open-indecies board))
 			)
 		)
 	)
+
+(defn get-computer-move-forward-depth [player board check-quadrants]
+	(first
+		(reduce
+			(fn [x y]
+				(if (> (second x) (second y)) x y )
+				)
+			(map
+				(fn [index]
+					(let [new-board (assoc-in board index player)]
+						[index (forward-with-depth-heuristic (get-other-player player) new-board (fn [board] (game-state board check-quadrants)) 0)]
+						)
+					)
+				(open-indecies board))
+			)
+		)
+	)
+
+(defn get-computer-move-forward-depth-pruning [player board check-quadrants]
+	(first
+		(reduce
+			(fn [x y]
+				(if (> (second x) (second y)) x y)
+				)
+			(map
+				(fn [index]
+					(let [new-board (assoc-in board index player)]
+						[index (forward-with-depth-heuristic-and-pruning (get-other-player player) new-board Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY (fn [board] (game-state board check-quadrants)) 0)]
+						)
+					)
+				(open-indecies board))
+			)
+		)
+	)
+
+(defn get-computer-move-tail [player board check-quadrants]
+	(first
+		(reduce
+			(fn [x y]
+				(if (> (second x) (second y)) x y )
+				)
+			(map
+				(fn [index]
+					(let [new-board (assoc-in board index player)]
+						[index (tail (get-other-player player) (BoardTree. new-board nil (open-indecies new-board) Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY) (fn [board] (game-state board check-quadrants)))]
+						)
+					)
+				(open-indecies board))
+			)
+		)
+	)
+
+(defn get-computer-move-tail-depth [player board check-quadrants]
+	(first
+		(reduce
+			(fn [x y]
+				(if (> (second x) (second y)) x y )
+				)
+			(map
+				(fn [index]
+					(let [new-board (assoc-in board index player)]
+						[index (tail-with-depth-heuristic (get-other-player player) (BoardTree. new-board nil (open-indecies new-board) Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY) (fn [board] (game-state board check-quadrants)) 0)]
+						)
+					)
+				(open-indecies board))
+			)
+		)
+	)
+
+(defn get-computer-move-tail-depth-pruning [player board check-quadrants]
+	(first
+		(reduce
+			(fn [x y]
+				(if (> (second x) (second y)) x y )
+				)
+			(map
+				(fn [index]
+					(let [new-board (assoc-in board index player)]
+						[index (tail-with-depth-heuristic-and-pruning (get-other-player player) (BoardTree. new-board nil (open-indecies new-board) Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY) (fn [board] (game-state board check-quadrants)) 0)]
+						)
+					)
+				(open-indecies board))
+			)
+		)
+	)
+
+(declare get-computer-move)
+(defn get-computer-move-build [player board check-quadrants]
+	(get-computer-move-forward-depth-pruning player board check-quadrants)
+	)
+(def get-computer-move (memoize get-computer-move-build))

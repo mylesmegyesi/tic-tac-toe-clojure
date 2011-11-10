@@ -1,6 +1,9 @@
 (ns tictactoe.board
 	(:use
-		[tictactoe.players]))
+		[tictactoe.players]
+		[tictactoe.console]))
+
+(def valid-board-sizes [3 4])
 
 (defn- row-str [row]
 	(str (reduce #(str %1 " " %2) row) "\n" (reduce #(str %1 " " %2) (repeat (count row) "-")) "\n")
@@ -71,4 +74,26 @@
 			(recur (assoc-in board [i (- (- end 1) i)] item) (inc i) end)
 			)
 		)
+	)
+
+(defn get-board-size []
+	(print (str "Please enter the size of board you would like to play on (" valid-board-sizes "): "))
+	(flush)
+	(let [error-message "That is not a valid board size, please try again."]
+	 	(loop [],
+			(let [board-size (get-int error-message)]
+				(if (some (partial = board-size) valid-board-sizes)
+					board-size
+					(do
+						(println error-message)
+						(recur)
+						)
+					)
+				)
+			)
+		)
+	)
+
+(defn get-board []
+	(create-board (get-board-size))
 	)

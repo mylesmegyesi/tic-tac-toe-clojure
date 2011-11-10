@@ -52,11 +52,34 @@
 		)
 	)
 
-(defn- player-won [board player]
+(defn- player-won-quadrant-index [board player index]
+	(let [i (first index) j (second index)]
+		(= player (get (get board i) j) (get (get board i) (+ j 1)) (get (get board (+ i 1)) j) (get (get board (+ i 1)) (+ j 1)))
+		)
+	)
+
+(defn- player-won-quadrant [board player]
+	(let [row-size (row-size board)]
+		(not= nil
+			(some
+				(partial player-won-quadrant-index board player)
+				(for [i (range 0 (- row-size 1)) j (range 0 (- row-size 1))]
+					[i j]
+					)
+				)
+			)
+		)
+	)
+
+(defn- player-won [board player check-quadrants]
 	(or
 		(player-won-row board player)
 		(player-won-column board player)
 		(player-won-diagonal board player)
+		(if check-quadrants
+			(player-won-quadrant board player)
+			false
+			)
 		)
 	)
 
@@ -64,10 +87,10 @@
 	(= 0 (count (open-indecies board)))
 	)
 
-(defn game-state [board]
-	(if (player-won board (players :p1))
+(defn game-state [board check-quadrants]
+	(if (player-won board (players :p1) check-quadrants)
 		(game-states :player1-won)
-		(if (player-won board (players :p2))
+		(if (player-won board (players :p2) check-quadrants)
 			(game-states :player2-won)
 			(if (board-full? board)
 				(game-states :draw)

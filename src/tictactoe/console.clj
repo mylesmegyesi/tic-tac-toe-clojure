@@ -34,3 +34,32 @@
 			)
 		)
 	)
+
+(defn- input-is-yes [input]
+	(let [lower-input (clojure.string/lower-case input)]
+		(or (= lower-input "yes") (= lower-input "y"))
+		)
+	)
+
+(defn- input-is-no [input]
+	(let [lower-input (clojure.string/lower-case input)]
+		(or (= lower-input "no") (= lower-input "n"))
+		)
+	)
+
+(defn get-bool [error-message]
+	(loop []
+		(let [input (clojure.string/trim (read-line))]
+			(if (input-is-yes input)
+				true
+				(if (input-is-no input)
+					false
+					(do
+						(println error-message)
+						(recur)
+						)
+					)
+				)
+			)
+		)
+	)

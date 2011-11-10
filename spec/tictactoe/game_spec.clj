@@ -8,7 +8,7 @@
 (describe "game"
 
 	(it "get game type repeats until a valid game type is given"
-		(with-in-str (apply str (interleave '(0 4 1) (repeat "\n")))
+		(with-in-str (apply str (interleave '(0 5 1) (repeat "\n")))
 			(should= 1 (binding [println mock-print print mock-print] (get-game-type)))
 			)
 		)
@@ -32,7 +32,7 @@
 		)
 
 	(it "get players gets the correct player map based on the given game type"
-		(with-in-str (apply str (interleave '(4 3) (repeat "\n")))
+		(with-in-str (apply str (interleave '(5 3) (repeat "\n")))
 			(should= (game-types 3) (binding [println mock-print print mock-print] (get-players)))
 			)
 		)

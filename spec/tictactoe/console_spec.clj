@@ -53,4 +53,34 @@
 			)
 		)
 
+	(it "get bool loops until yes is given"
+		(with-in-str (apply str (interleave '("m" "yes") (repeat "\n")))
+			(should (binding [println mock-print print mock-print] (get-bool "")))
+			)
+		)
+
+	(it "get bool outputs three error messages"
+		(with-in-str (apply str (interleave '("m" "m" "m" "yes") (repeat "\n")))
+			(should= 3 (count (clojure.string/split (with-out-str (get-bool "bad int")) #"\n")))
+			)
+		)
+
+	(it "get bool loops until no is given"
+		(with-in-str (apply str (interleave '("m m m" "no") (repeat "\n")))
+			(should-not (binding [println mock-print print mock-print] (get-bool "")))
+			)
+		)
+
+	(it "get bool loops until n is given"
+		(with-in-str (apply str (interleave '("m m m" "n") (repeat "\n")))
+			(should-not (binding [println mock-print print mock-print] (get-bool "")))
+			)
+		)
+
+	(it "get bool loops until y is given"
+		(with-in-str (apply str (interleave '("m m m" "y") (repeat "\n")))
+			(should (binding [println mock-print print mock-print] (get-bool "")))
+			)
+		)
+
 	)
