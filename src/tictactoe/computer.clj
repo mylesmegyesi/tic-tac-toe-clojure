@@ -6,8 +6,6 @@
 	  [tictactoe.board :as board])
 	)
 
-(defrecord BoardTree [board parent children alpha beta])
-
 (defn- get-state-score [player game-state]
 	(cond
 		(= game-state (game-states :player1-won)) (if (= player (players :p1)) (scores :win) (scores :lose))
@@ -59,6 +57,9 @@
 
 ; left over tail recursive functions
 (comment
+
+(defrecord BoardTree [board parent children alpha beta])
+
 (defn- get-parent-with-max [node heuristic]
 	(if (> heuristic (-> node :parent :alpha))
 		(:parent (assoc-in node [:parent :alpha] heuristic))
