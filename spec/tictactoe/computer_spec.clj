@@ -56,7 +56,7 @@
 		)
 
 	(it "never looses board size 4 without quadrant checking"
-	  (recurse (board/create-board 4) (fn [board] (game-state/game-state board false)) computer/get-computer-move)
+	  ;(recurse (board/create-board 4) (fn [board] (game-state/game-state board false)) computer/get-computer-move)
 		)
 
 	)
