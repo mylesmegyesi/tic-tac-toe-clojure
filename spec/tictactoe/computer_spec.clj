@@ -13,16 +13,16 @@
 
 (defn recurse [board game-state-fn computer-move-fn]
 	(let [size (board/row-size board)]
-		(flatten (for [index (board/open-indecies board)]
+		(doseq [index (board/open-indecies board)]
 			(let [board-with-p1-move (assoc-in board index (players :p1))]
 				(let [p1-state (game-state-fn board-with-p1-move)]
 					(if (not= p1-state (game-states :playing))
-						p1-state
+						(should-not= (game-states :player1-won) p1-state)
 						(let [board-with-p2-move (assoc-in board-with-p1-move (computer-move-fn game-state-fn (players :p2) board-with-p1-move) (players :p2))]
 							(let [p2-state (game-state-fn board-with-p2-move)]
 								(if (not= p2-state (game-states :playing))
-									p2-state
-									(recurse board-with-p2-move game-state-fn computer-move-fn)))))))))))
+									(should-not= (game-states :player1-won) p2-state)
+									(recurse board-with-p2-move game-state-fn computer-move-fn))))))))))
 
 (describe "computer"
 
@@ -51,17 +51,11 @@
 		)
 
   (it "get-computer-move-tail-depth-pruning never looses board size 3 without quadrant checking"
-    (let [results (recurse (board/create-board 3) (fn [board] (game-state/game-state board false)) computer/get-computer-move)]
-  	  (should-not (some (partial = (game-states :player1-won)) results))
-  	  )
+    (recurse (board/create-board 3) (fn [board] (game-state/game-state board false)) computer/get-computer-move)
 		)
 
 	(it "never looses board size 4 without quadrant checking"
-	  (comment
-	  (let [results (recurse (create-board 4) (fn [board] (game-state board false)) get-computer-move)]
-  	  (println (count (filter (partial = (game-states :player1-won)) results)) (count results))
-  	  (should-not (some (partial = (game-states :player1-won)) results))
-  	  ))
+	  ;(recurse (board/create-board 4) (fn [board] (game-state/game-state board false)) computer/get-computer-move)
 		)
 
 	)

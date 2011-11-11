@@ -16,25 +16,6 @@
 		)
 	)
 
-(defn- forward-no-heuristic [player board alpha beta game-state-fn max-depth depth]
-  (let [state (game-state-fn board)]
-		(if (not= state (game-states :playing))
-			(* -1 (get-state-score player state))
-			(if (>= depth max-depth)
-        (scores :draw)
-  	    (loop [alpha alpha open-spaces (board/open-indecies board)]
-  				(if (or (empty? open-spaces) (>= alpha beta))
-  					(* -1 alpha)
-  					(let [score (forward-no-heuristic (players/get-other-player player) (assoc-in board (first open-spaces) player) (* -1 beta) (* -1 alpha) game-state-fn max-depth (inc depth))]
-  						(recur (max score alpha) (rest open-spaces))
-  						)
-  					)
-  				)
-  			)
-			)
-		)
-	)
-
 (defn- forward [player board alpha beta game-state-fn max-depth depth]
   (let [state (game-state-fn board)]
 		(if (not= state (game-states :playing))
@@ -54,6 +35,30 @@
 		)
 	)
 
+(defn get-computer-move-forward [max-depth game-state-fn player board]
+	(first
+		(reduce
+			(fn [x y]
+				(if (> (second x) (second y)) x y)
+				)
+			(map
+				(fn [index]
+					(let [new-board (assoc-in board index player)]
+						[index (forward (players/get-other-player player) new-board Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY game-state-fn max-depth 0)]
+						)
+					)
+				(board/open-indecies board))
+			)
+		)
+	)
+
+(defn get-computer-move [game-state-fn player board]
+	(get-computer-move-forward 5 game-state-fn player board)
+	)
+
+
+; left over tail recursive functions
+(comment
 (defn- get-parent-with-max [node heuristic]
 	(if (> heuristic (-> node :parent :alpha))
 		(:parent (assoc-in node [:parent :alpha] heuristic))
@@ -97,40 +102,6 @@
 		)
 	)
 
-(defn get-computer-move-forward-dumber [max-depth game-state-fn player board]
-	(first
-		(reduce
-			(fn [x y]
-				(if (> (second x) (second y)) x y)
-				)
-			(map
-				(fn [index]
-					(let [new-board (assoc-in board index player)]
-						[index (forward-no-heuristic (players/get-other-player player) new-board Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY game-state-fn max-depth 0)]
-						)
-					)
-				(board/open-indecies board))
-			)
-		)
-	)
-
-(defn get-computer-move-forward [max-depth game-state-fn player board]
-	(first
-		(reduce
-			(fn [x y]
-				(if (> (second x) (second y)) x y)
-				)
-			(map
-				(fn [index]
-					(let [new-board (assoc-in board index player)]
-						[index (forward (players/get-other-player player) new-board Float/NEGATIVE_INFINITY Float/POSITIVE_INFINITY game-state-fn max-depth 0)]
-						)
-					)
-				(board/open-indecies board))
-			)
-		)
-	)
-
 (defn get-computer-move-tail [max-depth game-state-fn player board]
 	(first
 		(reduce
@@ -147,7 +118,4 @@
 			)
 		)
 	)
-
-(defn get-computer-move [game-state-fn player board]
-	(get-computer-move-forward 5 game-state-fn player board)
-	)
+)

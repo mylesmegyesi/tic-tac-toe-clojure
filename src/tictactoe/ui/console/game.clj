@@ -57,7 +57,7 @@
 
 (defn play []
 	(println "Welcome to Tic-Tac-Toe!")
-	(let [check-quadrants (get-check-quadrants-option) game-state-fn (fn [board] (game-state/game-state board check-quadrants)) player-movers (get-player-movers (get-players) game-state-fn)]
+	(let [player-options (get-players) check-quadrants (get-check-quadrants-option) game-state-fn (fn [board] (game-state/game-state board check-quadrants)) player-movers (get-player-movers player-options game-state-fn)]
 		(loop [board (board/get-board) current (players :p1) next (players :p2)]
 			(board/print-board board)
 			(let [state (game-state-fn board)]
