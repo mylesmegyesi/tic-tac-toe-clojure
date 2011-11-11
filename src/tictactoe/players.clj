@@ -1,6 +1,8 @@
-(ns tictactoe.players)
-
-(def players {:p1 "X" , :p2 "O", :none " "})
+(ns tictactoe.players
+  (:use
+    [tictactoe.constants :only (players)]
+    )
+  )
 
 (defn get-other-player [player]
 	(if (= player (players :p1))

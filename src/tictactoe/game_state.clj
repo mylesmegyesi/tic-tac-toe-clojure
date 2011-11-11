@@ -1,18 +1,10 @@
 (ns tictactoe.game-state
 	(:use
-		[tictactoe.board]
-		[tictactoe.players]))
-
-(def game-states {:playing 0, :player1-won 1, :player2-won 2, :draw 3})
-
-(defn print-state [state]
-	(if (= state (game-states :player1-won))
-		(println "Player 1 has won!")
-		(if (= state (game-states :player2-won))
-			(println "Player 2 has won!")
-			(println "Draw!")
-			)
-		)
+		[tictactoe.constants :only (game-states players)]
+	  )
+	(:require
+	  [tictactoe.board :as board]
+	  )
 	)
 
 (defn- player-won-row [board player]
@@ -20,7 +12,7 @@
 	)
 
 (defn- player-won-column [board player]
-	(some #(every? (partial = player) %1) (invert board))
+	(some #(every? (partial = player) %1) (board/invert board))
 	)
 
 (defn- player-won-first-diagonal [board player]
@@ -59,7 +51,7 @@
 	)
 
 (defn- player-won-quadrant [board player]
-	(let [row-size (row-size board)]
+	(let [row-size (board/row-size board)]
 		(not= nil
 			(some
 				(partial player-won-quadrant-index board player)
@@ -84,7 +76,7 @@
 	)
 
 (defn- board-full? [board]
-	(= 0 (count (open-indecies board)))
+	(= 0 (count (board/open-indecies board)))
 	)
 
 (defn game-state [board check-quadrants]

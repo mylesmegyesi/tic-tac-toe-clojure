@@ -1,1 +1,1 @@
-java -cp src:lib/clojure-1.2.1.jar clojure.main src/tictactoe/main.clj
+java -cp src:lib/clojure-1.2.1.jar clojure.main src/tictactoe//ui/console/main.clj

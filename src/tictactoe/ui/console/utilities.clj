@@ -1,6 +1,8 @@
-(ns tictactoe.console
+(ns tictactoe.ui.console.utilities
 	(:require
-		[clojure.string]))
+		[clojure.string]
+	  )
+  )
 
 (defn mock-print [& args])
 
@@ -63,3 +65,17 @@
 			)
 		)
 	)
+
+(defn get-input [get-fn validator error-message]
+ 	(loop [],
+		(let [ret (get-fn error-message)]
+			(if (validator ret)
+				ret
+				(do
+					(println error-message)
+					(recur)
+					)
+				)
+			)
+		)
+  )
