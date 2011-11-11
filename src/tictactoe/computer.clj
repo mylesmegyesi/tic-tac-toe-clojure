@@ -51,7 +51,7 @@
 	)
 
 (defn get-computer-move [game-state-fn player board]
-	(get-computer-move-forward 5 game-state-fn player board)
+	(get-computer-move-forward 7 game-state-fn player board)
 	)
 
 

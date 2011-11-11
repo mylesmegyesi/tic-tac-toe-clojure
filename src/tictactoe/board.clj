@@ -4,7 +4,7 @@
 		)
 	)
 
-(def valid-board-sizes [3 4])
+(def valid-board-sizes (range 3 7))
 
 (defn invert [board]
 	(loop [board board acc []]

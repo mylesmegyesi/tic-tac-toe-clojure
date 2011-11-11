@@ -8,6 +8,7 @@
 	  [tictactoe.computer :as computer]
 	  [tictactoe.game-state :as game-state]
 	  [tictactoe.ui.console.utilities :as utilities]
+	  [tictactoe.ui.console.game-state :as console.game-state]
 	  )
 	)
 
@@ -17,11 +18,17 @@
 			(let [board-with-p1-move (assoc-in board index (players :p1))]
 				(let [p1-state (game-state-fn board-with-p1-move)]
 					(if (not= p1-state (game-states :playing))
-						(should-not= (game-states :player1-won) p1-state)
+						(do
+						  (console.game-state/print-state p1-state)
+						  (should-not= (game-states :player1-won) p1-state)
+						  )
 						(let [board-with-p2-move (assoc-in board-with-p1-move (computer-move-fn game-state-fn (players :p2) board-with-p1-move) (players :p2))]
 							(let [p2-state (game-state-fn board-with-p2-move)]
 								(if (not= p2-state (game-states :playing))
-									(should-not= (game-states :player1-won) p2-state)
+									(do
+      						  (console.game-state/print-state p2-state)
+      						  (should-not= (game-states :player1-won) p2-state)
+      						  )
 									(recurse board-with-p2-move game-state-fn computer-move-fn))))))))))
 
 (describe "computer"
@@ -55,7 +62,7 @@
 		)
 
 	(it "never looses board size 4 without quadrant checking"
-	  ;(recurse (board/create-board 4) (fn [board] (game-state/game-state board false)) computer/get-computer-move)
+	  (recurse (board/create-board 4) (fn [board] (game-state/game-state board false)) computer/get-computer-move)
 		)
 
 	)

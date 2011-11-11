@@ -7,9 +7,9 @@
   )
 
 (def computer-types
-	{1 {:fn (partial computer/get-computer-move-forward 3) :name "Not so smart"}
-	  2 {:fn (partial computer/get-computer-move-forward 4) :name "Smarter"}
-    3 {:fn (partial computer/get-computer-move-forward 7) :name "Smartest"}
+	{1 {:fn (partial computer/get-computer-move-forward 3) :name "Not so smart (fastest move time)"}
+	  2 {:fn (partial computer/get-computer-move-forward 4) :name "Smarter (slower move time)"}
+    3 {:fn (partial computer/get-computer-move-forward 7) :name "Smartest (slowest move time)"}
     }
 	)
 
