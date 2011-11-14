@@ -15,12 +15,12 @@
 		)
 	)
 
-(defn row-size [board]
+(defn board-size [board]
 	(count (get board 0))
 	)
 
 (defn open-indecies [board]
-	(let [size (row-size board)]
+	(let [size (board-size board)]
 		(vec
 			(for [i (range size) j (range size) :when (= (players :none) (get (get board i) j))]
 				[i j]

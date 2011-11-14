@@ -4,7 +4,13 @@
 	  )
   )
 
-(defn mock-print [& args])
+(defmacro eat-output [& body]
+  `(let [s# (new java.io.StringWriter)]
+    (binding [*out* s#]
+      ~@body
+      )
+    )
+  )
 
 (defn get-int [error-message]
 	(loop []
@@ -66,7 +72,9 @@
 		)
 	)
 
-(defn get-input [get-fn validator error-message]
+(defn get-input [prompt get-fn validator error-message]
+  (print prompt)
+  (flush)
  	(loop [],
 		(let [ret (get-fn error-message)]
 			(if (validator ret)

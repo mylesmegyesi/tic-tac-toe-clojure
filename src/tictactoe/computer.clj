@@ -50,10 +50,12 @@
 		)
 	)
 
-(defn get-computer-move [game-state-fn player board]
-	(get-computer-move-forward 7 game-state-fn player board)
+(def computer-types
+	{1 {:fn (partial get-computer-move-forward 2) :name "Not so smart (fastest move time)"}
+	  2 {:fn (partial get-computer-move-forward 4) :name "Smarter (slower move time)"}
+    3 {:fn (partial get-computer-move-forward 7) :name "Smartest (slowest move time)"}
+    }
 	)
-
 
 ; left over tail recursive functions
 (comment

@@ -8,14 +8,20 @@
     )
   )
 
-(it "get computer type repeats until a valid game type is given"
-	(with-in-str (apply str (interleave '(0 5 1) (repeat "\n")))
-		(should= 1 (binding [println utilities/mock-print print utilities/mock-print] (computer/get-computer-type 0)))
-		)
-	)
+(describe "get-computer-type"
 
-(it "get computer type gets the game type from the user"
-	(with-in-str (apply str (interleave '(1) (repeat "\n")))
-		(should= 1 (binding [println utilities/mock-print print utilities/mock-print] (computer/get-computer-type 0)))
-		)
-	)
+  (it "repeats until a valid computer type is given"
+  	(with-in-str (apply str (interleave '(0 4 5 1) (repeat "\n")))
+  		(should= 1 (utilities/eat-output (computer/get-computer-type 0)))
+  		)
+  	)
+
+  (it "gets the computer type from the user"
+  	(with-in-str (apply str (interleave '(1) (repeat "\n")))
+  		(should= 1 (utilities/eat-output (computer/get-computer-type 0)))
+  		)
+  	)
+
+  )
+
+(run-specs)

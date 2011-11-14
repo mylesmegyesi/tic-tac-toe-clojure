@@ -1,45 +1,85 @@
 (ns tictactoe.ui.console.game-spec
   (:use
     [speclj.core]
+    [tictactoe.constants :only (players)]
     )
   (:require
+    [tictactoe.board :as board]
+    [tictactoe.game-state :as game-state]
     [tictactoe.ui.console.utilities :as utilities]
     [tictactoe.ui.console.game :as game]
+    [tictactoe.ui.console.user :as user]
     )
   )
 
-(describe "game"
+(describe "get-game-type"
 
-	(it "get game type repeats until a valid game type is given"
+  (it "repeats until a valid game type is given"
 		(with-in-str (apply str (interleave '(0 5 1) (repeat "\n")))
-			(should= 1 (binding [println utilities/mock-print print utilities/mock-print] (game/get-game-type)))
+			(should= 1 (utilities/eat-output (game/get-game-type)))
 			)
 		)
 
-	(it "get game type gets the game type from the user"
+	(it "gets the game type from the user"
 		(with-in-str (apply str (interleave '(1) (repeat "\n")))
-			(should= 1 (binding [println utilities/mock-print print utilities/mock-print] (game/get-game-type)))
+			(should= 1 (utilities/eat-output (game/get-game-type)))
 			)
 		)
 
-	(it "get players gets the correct player map based on the given game type"
+  )
+
+(describe "get-players"
+
+	(it "gets a human vs. human player map"
 		(with-in-str (apply str (interleave '(1) (repeat "\n")))
-			(should= (game/game-types 1) (binding [println utilities/mock-print print utilities/mock-print] (game/get-players)))
+			(should= (game/game-types 1) (utilities/eat-output (game/get-players)))
 			)
 		)
 
-	(it "get players gets the correct player map based on the given game type"
+	(it "gets a human vs. computer player map"
 		(with-in-str (apply str (interleave '(2) (repeat "\n")))
-			(should= (game/game-types 2) (binding [println utilities/mock-print print utilities/mock-print] (game/get-players)))
+			(should= (game/game-types 2) (utilities/eat-output (game/get-players)))
 			)
 		)
 
-	(it "get players gets the correct player map based on the given game type"
-		(with-in-str (apply str (interleave '(5 3) (repeat "\n")))
-			(should= (game/game-types 3) (binding [println utilities/mock-print print utilities/mock-print] (game/get-players)))
+	(it "gets a computer vs. human player map"
+		(with-in-str (apply str (interleave '(3) (repeat "\n")))
+			(should= (game/game-types 3) (utilities/eat-output (game/get-players)))
+			)
+		)
+
+	(it "gets a computer vs. computer player map"
+		(with-in-str (apply str (interleave '(4) (repeat "\n")))
+			(should= (game/game-types 4) (utilities/eat-output (game/get-players)))
 			)
 		)
 
 	)
+
+(describe "get-check-quadrants-option"
+
+	(it "returns true when true is given"
+		(with-in-str (apply str (interleave '("y") (repeat "\n")))
+			(should (utilities/eat-output (game/get-check-quadrants-option)))
+			)
+		)
+
+	(it "returns false when false is given"
+		(with-in-str (apply str (interleave '("n") (repeat "\n")))
+			(should-not (utilities/eat-output (game/get-check-quadrants-option)))
+			)
+		)
+
+	)
+
+(describe "game-loop"
+
+  (it "repeats until the game is over"
+    (with-in-str (apply str (interleave '("1 1" "2 2" "1 2" " 2 3" "1 3") (repeat "\n")))
+			(utilities/eat-output (game/game-loop (board/create-board 3) (players :p1) (players :p2) {(players :p1) user/get-user-move (players :p2) user/get-user-move} (fn [board] (game-state/game-state board false))))
+			)
+    )
+
+  )
 
 (run-specs)

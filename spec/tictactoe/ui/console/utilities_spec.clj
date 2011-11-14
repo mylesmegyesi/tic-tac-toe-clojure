@@ -8,84 +8,128 @@
     )
   )
 
-(describe "utilities"
+(describe "get-int"
 
-	(it "get int repeats until an integer is given"
+  (it "repeats until an integer is given"
 		(with-in-str (apply str (interleave '("m" 0) (repeat "\n")))
-			(should= 0 (binding [println utilities/mock-print print utilities/mock-print] (utilities/get-int "")))
+			(should= 0 (utilities/eat-output (utilities/get-int "")))
 			)
 		)
 
-	(it "get int outputs three error messages"
+	(it "outputs an error messge each time bad input is given"
 		(with-in-str (apply str (interleave '("m" "m" "m" 0) (repeat "\n")))
 			(should= 3 (count (clojure.string/split (with-out-str (utilities/get-int "bad int")) #"\n")))
 			)
 		)
 
-	(it "all the error messgaes are the same as the given error message"
+	(it "outputs the same error messge each time bad input is given"
 		(with-in-str (apply str (interleave '("m" "m" "m" 0) (repeat "\n")))
 			(should (every? (partial = "bad int") (clojure.string/split (with-out-str (utilities/get-int "bad int")) #"\n")))
 			)
 		)
 
-	(it "get index repeats until an index is given"
-		(with-in-str (apply str (interleave '("m" "1 1") (repeat "\n")))
-			(should= [0 0] (binding [println utilities/mock-print print utilities/mock-print] (utilities/get-index "")))
+  )
+
+(describe "get-index"
+
+  (it "repeats until an index is given"
+  	(with-in-str (apply str (interleave '("m" "1 1") (repeat "\n")))
+  		(should= [0 0] (utilities/eat-output (utilities/get-index "")))
+  		)
+  	)
+
+  (it "only accepts two integers"
+  	(with-in-str (apply str (interleave '("m" "m m" "m 0" "0 m" "1 1") (repeat "\n")))
+  		(should= [0 0] (utilities/eat-output (utilities/get-index "")))
+  		)
+  	)
+
+  (it "accepts two integers with variable space in between them"
+  	(with-in-str (apply str (interleave '("1   1") (repeat "\n")))
+  		(should= [0 0] (utilities/eat-output (utilities/get-index "")))
+  		)
+  	)
+
+  (it "outputs an error messge each time bad input is given"
+  	(with-in-str (apply str (interleave '("m" "m" "m" "1 1") (repeat "\n")))
+  		(should= 3 (count (clojure.string/split (with-out-str (utilities/get-index "bad index")) #"\n")))
+  		)
+  	)
+
+  (it "outputs the same error messge each time bad input is given"
+  	(with-in-str (apply str (interleave '("m" "m" "m" "1 1") (repeat "\n")))
+  		(should (every? (partial = "bad index") (clojure.string/split (with-out-str (utilities/get-index "bad index")) #"\n")))
+  		)
+  	)
+
+  )
+
+(describe "get-bool"
+
+  (it "accepts yes"
+		(with-in-str (apply str (interleave '("yes") (repeat "\n")))
+			(should (utilities/eat-output (utilities/get-bool "")))
 			)
 		)
 
-	(it "get index won't accept anything except two integers"
-		(with-in-str (apply str (interleave '("m" "m m" "m 0" "0 m" "1 1") (repeat "\n")))
-			(should= [0 0] (binding [println utilities/mock-print print utilities/mock-print] (utilities/get-index "")))
+  (it "accepts y"
+  	(with-in-str (apply str (interleave '("y") (repeat "\n")))
+  		(should (utilities/eat-output (utilities/get-bool "")))
+  		)
+  	)
+
+	(it "accepts no"
+		(with-in-str (apply str (interleave '("no") (repeat "\n")))
+			(should-not (utilities/eat-output (utilities/get-bool "")))
 			)
 		)
 
-	(it "get index will accept two integers with variable space in between them"
-		(with-in-str (apply str (interleave '("1   1") (repeat "\n")))
-			(should= [0 0] (binding [println utilities/mock-print print utilities/mock-print] (utilities/get-index "")))
+	(it "accepts n"
+		(with-in-str (apply str (interleave '("n") (repeat "\n")))
+			(should-not (utilities/eat-output (utilities/get-bool "")))
 			)
 		)
 
-	(it "get index outputs three error messages"
-		(with-in-str (apply str (interleave '("m" "m" "m" "1 1") (repeat "\n")))
-			(should= 3 (count (clojure.string/split (with-out-str (utilities/get-index "bad index")) #"\n")))
-			)
-		)
+  (it "outputs an error messge each time bad input is given"
+  	(with-in-str (apply str (interleave '("m" "m" "m" "y") (repeat "\n")))
+  		(should= 3 (count (clojure.string/split (with-out-str (utilities/get-bool "bad index")) #"\n")))
+  		)
+  	)
 
-	(it "all the error messgaes are the same as the given error message"
-		(with-in-str (apply str (interleave '("m" "m" "m" "1 1") (repeat "\n")))
-			(should (every? (partial = "bad index") (clojure.string/split (with-out-str (utilities/get-index "bad index")) #"\n")))
-			)
-		)
+  (it "outputs the same error messge each time bad input is given"
+  	(with-in-str (apply str (interleave '("m" "m" "m" "y") (repeat "\n")))
+  		(should (every? (partial = "bad") (clojure.string/split (with-out-str (utilities/get-bool "bad")) #"\n")))
+  		)
+  	)
 
-	(it "get bool loops until yes is given"
-		(with-in-str (apply str (interleave '("m" "yes") (repeat "\n")))
-			(should (binding [println utilities/mock-print print utilities/mock-print] (utilities/get-bool "")))
-			)
-		)
+  )
 
-	(it "get bool outputs three error messages"
-		(with-in-str (apply str (interleave '("m" "m" "m" "yes") (repeat "\n")))
-			(should= 3 (count (clojure.string/split (with-out-str (utilities/get-bool "bad int")) #"\n")))
-			)
-		)
+(describe "get-input"
 
-	(it "get bool loops until no is given"
-		(with-in-str (apply str (interleave '("m m m" "no") (repeat "\n")))
-			(should-not (binding [println utilities/mock-print print utilities/mock-print] (utilities/get-bool "")))
-			)
-		)
+  (it "returns when the validation passes"
+    (with-in-str (apply str (interleave '("3") (repeat "\n")))
+  		(should= 3 (utilities/eat-output (utilities/get-input "" utilities/get-int #(> % 2) "bad")))
+  		)
+    )
 
-	(it "get bool loops until n is given"
-		(with-in-str (apply str (interleave '("m m m" "n") (repeat "\n")))
-			(should-not (binding [println utilities/mock-print print utilities/mock-print] (utilities/get-bool "")))
-			)
-		)
+  (it "repeats until the validation passes"
+    (with-in-str (apply str (interleave '("1" "2" "3") (repeat "\n")))
+  		(should= 3 (utilities/eat-output (utilities/get-input "" utilities/get-int #(> % 2) "bad")))
+  		)
+    )
 
-	(it "get bool loops until y is given"
-		(with-in-str (apply str (interleave '("m m m" "y") (repeat "\n")))
-			(should (binding [println utilities/mock-print print utilities/mock-print] (utilities/get-bool "")))
-			)
-		)
+  (it "outputs an error messge each time bad input is given"
+  	(with-in-str (apply str (interleave '("1" "2" "3" "4") (repeat "\n")))
+  		(should= 3 (count (clojure.string/split (with-out-str (utilities/get-input "" utilities/get-int #(> % 3) "bad")) #"\n")))
+  		)
+  	)
 
-	)
+  (it "outputs the same error messge each time bad input is given"
+  	(with-in-str (apply str (interleave '("1" "2" "3" "4") (repeat "\n")))
+  		(should (every? (partial = "bad") (clojure.string/split (with-out-str (utilities/get-input "" utilities/get-int #(> % 3) "bad")) #"\n")))
+  		)
+  	)
+
+  )
+
+(run-specs)

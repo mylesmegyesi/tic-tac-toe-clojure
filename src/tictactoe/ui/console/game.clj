@@ -29,9 +29,7 @@
 
 (defn get-game-type []
 	(display-game-types)
-	(print "Please enter the type of game you would like to play: ")
-	(flush)
-	(utilities/get-input utilities/get-int (fn [game-type] (contains? game-types game-type)) "That is not a valid game type, please try again.")
+	(utilities/get-input "Please enter the type of game you would like to play: " utilities/get-int (fn [game-type] (contains? game-types game-type)) "That is not a valid game type, please try again.")
 	)
 
 (defn get-players []
@@ -47,25 +45,25 @@
 	((player-movers player) player board)
 	)
 
-(defn- get-check-quadrants-option []
-	(print "Would you like to turn on the quadrant win option (yes or no): ")
-	(flush)
-	(let [error-message "That is not a valid answer, please try again."]
-		(utilities/get-bool error-message)
-		)
+(defn get-check-quadrants-option []
+	(utilities/get-input "Would you like to turn on the quadrant win option (yes or no): " utilities/get-bool (fn [& args] true) "That is not a valid answer, please try again.")
 	)
+
+(defn game-loop [board current-player next-player player-movers game-state-fn]
+  (loop [board board current-player current-player next-player next-player]
+    (board/print-board board)
+    (let [state (game-state-fn board)]
+  		(if (not= (game-states :playing) state)
+  			(console.game-state/print-state state)
+  			(recur (assoc-in board (get-move player-movers current-player board) current-player) next-player current-player)
+  			)
+  		)
+    )
+  )
 
 (defn play []
 	(println "Welcome to Tic-Tac-Toe!")
 	(let [player-options (get-players) check-quadrants (get-check-quadrants-option) game-state-fn (fn [board] (game-state/game-state board check-quadrants)) player-movers (get-player-movers player-options game-state-fn)]
-		(loop [board (board/get-board) current (players :p1) next (players :p2)]
-			(board/print-board board)
-			(let [state (game-state-fn board)]
-				(if (not= (game-states :playing) state)
-					(console.game-state/print-state state)
-					(recur (assoc-in board (get-move player-movers current board) current) next current)
-					)
-				)
-			)
+		(game-loop (board/get-board) (players :p1) (players :p2) player-movers game-state-fn)
 		)
 	)

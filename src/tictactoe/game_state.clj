@@ -51,11 +51,11 @@
 	)
 
 (defn- player-won-quadrant [board player]
-	(let [row-size (board/row-size board)]
+	(let [board-size (board/board-size board)]
 		(not= nil
 			(some
 				(partial player-won-quadrant-index board player)
-				(for [i (range 0 (- row-size 1)) j (range 0 (- row-size 1))]
+				(for [i (range 0 (- board-size 1)) j (range 0 (- board-size 1))]
 					[i j]
 					)
 				)
