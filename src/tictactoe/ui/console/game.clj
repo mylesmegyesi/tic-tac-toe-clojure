@@ -1,6 +1,6 @@
 (ns tictactoe.ui.console.game
 	(:use
-		[tictactoe.constants :only (game-states players)]
+		[tictactoe.constants]
 	  )
   (:require
 	  [tictactoe.players :as players]
@@ -14,10 +14,10 @@
 	)
 
 (def game-types
-	{1 {(players :p1) user/get-user-mover, (players :p2) user/get-user-mover, :name "Human vs. Human"}
-		2 {(players :p1) user/get-user-mover, (players :p2) computer/get-computer-mover, :name "Human vs. Computer"}
-		3 {(players :p1) computer/get-computer-mover, (players :p2) user/get-user-mover, :name "Computer vs. Human"}
-		4 {(players :p1) computer/get-computer-mover, (players :p2) computer/get-computer-mover, :name "Computer vs. Computer"}}
+	{1 {P1 user/get-user-mover, P2 user/get-user-mover, :name "Human vs. Human"}
+		2 {P1 user/get-user-mover, P2 computer/get-computer-mover, :name "Human vs. Computer"}
+		3 {P1 computer/get-computer-mover, P2 user/get-user-mover, :name "Computer vs. Human"}
+		4 {P1 computer/get-computer-mover, P2 computer/get-computer-mover, :name "Computer vs. Computer"}}
 	)
 
 (defn- display-game-types []
@@ -37,8 +37,8 @@
 	)
 
 (defn- get-player-movers [game-type game-state-fn]
-  {(players :p1) ((game-type (players :p1)) game-state-fn (players :p1))
-    (players :p2) ((game-type (players :p2)) game-state-fn (players :p2))}
+  {P1 ((game-type P1) game-state-fn P1)
+    P2 ((game-type P2) game-state-fn P2)}
   )
 
 (defn- get-move [player-movers player board]
@@ -53,7 +53,7 @@
   (loop [board board current-player current-player next-player next-player]
     (board/print-board board)
     (let [state (game-state-fn board)]
-  		(if (not= (game-states :playing) state)
+  		(if (not= :playing state)
   			(console.game-state/print-state state)
   			(recur (assoc-in board (get-move player-movers current-player board) current-player) next-player current-player)
   			)
@@ -63,7 +63,10 @@
 
 (defn play []
 	(println "Welcome to Tic-Tac-Toe!")
-	(let [player-options (get-players) check-quadrants (get-check-quadrants-option) game-state-fn (fn [board] (game-state/game-state board check-quadrants)) player-movers (get-player-movers player-options game-state-fn)]
-		(game-loop (board/get-board) (players :p1) (players :p2) player-movers game-state-fn)
+	(let [player-options (get-players)
+	     check-quadrants (get-check-quadrants-option)
+	     game-state-fn (fn [board] (game-state/game-state board check-quadrants))
+	     player-movers (get-player-movers player-options game-state-fn)]
+		(game-loop (board/get-board) P1 P2 player-movers game-state-fn)
 		)
 	)

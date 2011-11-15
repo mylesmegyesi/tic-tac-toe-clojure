@@ -1,12 +1,12 @@
 (ns tictactoe.ui.console.game-state
   (:use
-    [tictactoe.constants :only (game-states)])
+    [tictactoe.constants])
   )
 
 (defn print-state [state]
-	(if (= state (game-states :player1-won))
+	(if (= state :player1-won)
 		(println "Player 1 has won!")
-		(if (= state (game-states :player2-won))
+		(if (= state :player2-won)
 			(println "Player 2 has won!")
 			(println "Draw!")
 			)

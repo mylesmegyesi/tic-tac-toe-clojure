@@ -1,6 +1,6 @@
 (ns tictactoe.game-state
 	(:use
-		[tictactoe.constants :only (game-states players)]
+		[tictactoe.constants]
 	  )
 	(:require
 	  [tictactoe.board :as board]
@@ -80,13 +80,13 @@
 	)
 
 (defn game-state [board check-quadrants]
-	(if (player-won board (players :p1) check-quadrants)
-		(game-states :player1-won)
-		(if (player-won board (players :p2) check-quadrants)
-			(game-states :player2-won)
+	(if (player-won board P1 check-quadrants)
+		:player1-won
+		(if (player-won board P2 check-quadrants)
+			:player2-won
 			(if (board-full? board)
-				(game-states :draw)
-				(game-states :playing))
+				:draw
+				:playing)
 			)
 		)
 	)

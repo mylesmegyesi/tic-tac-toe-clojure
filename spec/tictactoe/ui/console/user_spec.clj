@@ -1,7 +1,7 @@
 (ns tictactoe.ui.console.user-spec
   (:use
     [speclj.core]
-		[tictactoe.constants :only (scores players)]
+		[tictactoe.constants]
 		)
 	(:require
 	  [tictactoe.ui.console.utilities :as utilities]
@@ -26,7 +26,7 @@
 
 	(it "only accepts indecies that aren't occupied"
 		(with-in-str (apply str (interleave '("1 1" "1 2") (repeat "\n")))
-			(should= [0 1] (utilities/eat-output (user/get-user-move 0 (assoc-in (board/create-board 3) [0 0] (players :p1)))))
+			(should= [0 1] (utilities/eat-output (user/get-user-move 0 (assoc-in (board/create-board 3) [0 0] P1))))
 			)
 		)
 

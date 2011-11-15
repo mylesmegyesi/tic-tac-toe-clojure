@@ -1,6 +1,6 @@
 (ns tictactoe.board
 	(:use
-		[tictactoe.constants :only (players)]
+		[tictactoe.constants]
 		)
 	)
 
@@ -22,7 +22,7 @@
 (defn open-indecies [board]
 	(let [size (board-size board)]
 		(vec
-			(for [i (range size) j (range size) :when (= (players :none) (get (get board i) j))]
+			(for [i (range size) j (range size) :when (= NOONE (get (get board i) j))]
 				[i j]
 				)
 			)
@@ -34,7 +34,7 @@
 	)
 
 (defn create-board [size]
-	(vec (repeat size (vec (repeat size (players :none)))))
+	(vec (repeat size (vec (repeat size NOONE))))
 	)
 
 (defn fill-row [board row item]

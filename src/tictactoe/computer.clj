@@ -1,6 +1,6 @@
 (ns tictactoe.computer
 	(:use
-		[tictactoe.constants :only (game-states scores players)])
+		[tictactoe.constants])
 	(:require
 	  [tictactoe.players :as players]
 	  [tictactoe.board :as board])
@@ -8,18 +8,18 @@
 
 (defn- get-state-score [player game-state]
 	(cond
-		(= game-state (game-states :player1-won)) (if (= player (players :p1)) (scores :win) (scores :lose))
-		(= game-state (game-states :player2-won)) (if (= player (players :p2)) (scores :win) (scores :lose))
-		:else (scores :draw)
+		(= game-state :player1-won) (if (= player P1) WIN LOSE)
+		(= game-state :player2-won) (if (= player P2) WIN LOSE)
+		:else DRAW
 		)
 	)
 
 (defn- forward [player board alpha beta game-state-fn max-depth depth]
   (let [state (game-state-fn board)]
-		(if (not= state (game-states :playing))
+		(if (not= state :playing)
 			(* -1 (+ (get-state-score player state) depth))
 			(if (>= depth max-depth)
-        (scores :draw)
+        DRAW
   	    (loop [alpha alpha open-spaces (board/open-indecies board)]
   				(if (or (empty? open-spaces) (>= alpha beta))
   					(* -1 alpha)
@@ -75,7 +75,7 @@
 		(* -1 (+ (:alpha current-node) depth))
 		(let [state (game-state-fn (:board current-node))]
 			;determine if this is a leaf node
-			(if (not= state (game-states :playing))
+			(if (not= state :playing)
 				;leaf node
 				(if (= nil (:parent current-node)) ;it's a leaf and a root
 					(* -1 (+ (get-state-score player state) depth))

@@ -1,7 +1,7 @@
 (ns tictactoe.ui.console.game-spec
   (:use
     [speclj.core]
-    [tictactoe.constants :only (players)]
+    [tictactoe.constants]
     )
   (:require
     [tictactoe.board :as board]
@@ -76,7 +76,7 @@
 
   (it "repeats until the game is over"
     (with-in-str (apply str (interleave '("1 1" "2 2" "1 2" " 2 3" "1 3") (repeat "\n")))
-			(utilities/eat-output (game/game-loop (board/create-board 3) (players :p1) (players :p2) {(players :p1) user/get-user-move (players :p2) user/get-user-move} (fn [board] (game-state/game-state board false))))
+			(utilities/eat-output (game/game-loop (board/create-board 3) P1 P2 {P1 user/get-user-move P2 user/get-user-move} (fn [board] (game-state/game-state board false))))
 			)
     )
 

@@ -1,7 +1,9 @@
 (ns tictactoe.constants)
 
-(def scores {:draw 0 :win 1000 :lose -1000})
+(def DRAW 0)
+(def WIN 1000)
+(def LOSE -1000)
 
-(def players {:p1 "X" , :p2 "O", :none " "})
-
-(def game-states {:playing 0, :player1-won 1, :player2-won 2, :draw 3})
+(def P1 "X")
+(def P2 "Y")
+(def NOONE " ")

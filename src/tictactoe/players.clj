@@ -1,21 +1,21 @@
 (ns tictactoe.players
   (:use
-    [tictactoe.constants :only (players)]
+    [tictactoe.constants]
     )
   )
 
 (defn get-other-player [player]
-	(if (= player (players :p1))
-		(players :p2)
-		(if (= player (players :p2))
-			(players :p1)
-			(players :none)
+	(if (= player P1)
+		P2
+		(if (= player P2)
+			P1
+			NOONE
 			)
 		)
 	)
 
 (defn get-player-name [player]
-	(if (= player (players :p1))
+	(if (= player P1)
 		"Player 1"
 		"Player 2"
 		)
