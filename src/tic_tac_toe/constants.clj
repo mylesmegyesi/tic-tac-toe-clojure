@@ -5,5 +5,5 @@
 (def LOSE -1000)
 
 (def P1 "X")
-(def P2 "Y")
+(def P2 "O")
 (def NOONE " ")
