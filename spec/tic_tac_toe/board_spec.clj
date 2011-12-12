@@ -1,4 +1,4 @@
-(ns tictactoe.board-spec
+(ns tic-tac-toe.board-spec
   (:use
     [speclj.core]
 		[tic-tac-toe.constants]
