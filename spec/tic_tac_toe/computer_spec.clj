@@ -1,14 +1,12 @@
-(ns tictactoe.computer-spec
+(ns tic-tac-toe.computer-spec
   (:use
     [speclj.core]
-		[tictactoe.constants]
+		[tic-tac-toe.constants]
 	  )
 	(:require
-	  [tictactoe.board :as board]
-	  [tictactoe.computer :as computer]
-	  [tictactoe.game-state :as game-state]
-	  [tictactoe.ui.console.utilities :as utilities]
-	  [tictactoe.ui.console.game-state :as console.game-state]
+	  [tic-tac-toe.board :as board]
+	  [tic-tac-toe.computer :as computer]
+	  [tic-tac-toe.game-state :as game-state]
 	  )
 	)
 

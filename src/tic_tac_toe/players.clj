@@ -1,6 +1,6 @@
-(ns tictactoe.players
+(ns tic-tac-toe.players
   (:use
-    [tictactoe.constants]
+    [tic-tac-toe.constants]
     )
   )
 

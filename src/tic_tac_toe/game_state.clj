@@ -1,9 +1,9 @@
-(ns tictactoe.game-state
+(ns tic-tac-toe.game-state
 	(:use
-		[tictactoe.constants]
+		[tic-tac-toe.constants]
 	  )
 	(:require
-	  [tictactoe.board :as board]
+	  [tic-tac-toe.board :as board]
 	  )
 	)
 

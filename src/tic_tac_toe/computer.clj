@@ -1,9 +1,9 @@
-(ns tictactoe.computer
+(ns tic-tac-toe.computer
 	(:use
-		[tictactoe.constants])
+		[tic-tac-toe.constants])
 	(:require
-	  [tictactoe.players :as players]
-	  [tictactoe.board :as board])
+	  [tic-tac-toe.players :as players]
+	  [tic-tac-toe.board :as board])
 	)
 
 (defn- get-state-score [player game-state]

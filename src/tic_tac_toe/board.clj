@@ -1,6 +1,6 @@
-(ns tictactoe.board
+(ns tic-tac-toe.board
 	(:use
-		[tictactoe.constants]
+		[tic-tac-toe.constants]
 		)
 	)
 

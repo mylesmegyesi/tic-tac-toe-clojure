@@ -1,11 +1,11 @@
-(ns tictactoe.game-state-spec
+(ns tic-tac-toe.game-state-spec
   (:use
     [speclj.core]
-		[tictactoe.constants]
+		[tic-tac-toe.constants]
 		)
 	(:require
-	  [tictactoe.game-state :as game-state]
-	  [tictactoe.board :as board]
+	  [tic-tac-toe.game-state :as game-state]
+	  [tic-tac-toe.board :as board]
 	  )
 	)
 

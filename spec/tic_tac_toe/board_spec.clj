@@ -1,10 +1,10 @@
 (ns tictactoe.board-spec
   (:use
     [speclj.core]
-		[tictactoe.constants]
+		[tic-tac-toe.constants]
 	  )
 	(:require
-	  [tictactoe.board :as board]
+	  [tic-tac-toe.board :as board]
 	  )
 	)
 

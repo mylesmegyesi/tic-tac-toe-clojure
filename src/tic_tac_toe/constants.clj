@@ -1,4 +1,4 @@
-(ns tictactoe.constants)
+(ns tic-tac-toe.constants)
 
 (def DRAW 0)
 (def WIN 1000)
