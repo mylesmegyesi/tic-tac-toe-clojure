@@ -1,19 +1,12 @@
 (ns tic-tac-toe.game-state
-	(:use
-		[tic-tac-toe.constants]
-	  )
-	(:require
-	  [tic-tac-toe.board :as board]
-	  )
-	)
+	(:require [tic-tac-toe.constants :refer :all]
+            [tic-tac-toe.board     :as board]))
 
 (defn- player-won-row [board player]
-	(some #(every? (partial = player) %1) board)
-	)
+	(some #(every? (partial = player) %1) board))
 
 (defn- player-won-column [board player]
-	(some #(every? (partial = player) %1) (board/invert board))
-	)
+	(some #(every? (partial = player) %1) (board/invert board)))
 
 (defn- player-won-first-diagonal [board player]
 	(loop [i 0 size (count board)]
@@ -21,10 +14,7 @@
 			true
 			(if (not= (get (get board i) i) player)
 				false
-				(recur (inc i) size))
-			)
-		)
-	)
+				(recur (inc i) size)))))
 
 (defn- player-won-second-diagonal [board player]
 	(loop [i 0 size (count board)]
@@ -32,23 +22,16 @@
 			true
 			(if (not= (get (get board i) (- (- size 1) i)) player)
 				false
-				(recur (inc i) size))
-			)
-		)
-	)
+				(recur (inc i) size)))))
 
 (defn- player-won-diagonal [board player]
 	(or
 		(player-won-first-diagonal board player)
-		(player-won-second-diagonal board player)
-		)
-	)
+		(player-won-second-diagonal board player)))
 
 (defn- player-won-quadrant-index [board player index]
 	(let [i (first index) j (second index)]
-		(= player (get (get board i) j) (get (get board i) (+ j 1)) (get (get board (+ i 1)) j) (get (get board (+ i 1)) (+ j 1)))
-		)
-	)
+		(= player (get (get board i) j) (get (get board i) (+ j 1)) (get (get board (+ i 1)) j) (get (get board (+ i 1)) (+ j 1)))))
 
 (defn- player-won-quadrant [board player]
 	(let [board-size (board/board-size board)]
@@ -56,12 +39,7 @@
 			(some
 				(partial player-won-quadrant-index board player)
 				(for [i (range 0 (- board-size 1)) j (range 0 (- board-size 1))]
-					[i j]
-					)
-				)
-			)
-		)
-	)
+					[i j])))))
 
 (defn- player-won [board player check-quadrants]
 	(or
@@ -70,14 +48,10 @@
 		(player-won-diagonal board player)
 		(if check-quadrants
 			(player-won-quadrant board player)
-			false
-			)
-		)
-	)
+			false)))
 
 (defn- board-full? [board]
-	(= 0 (count (board/open-indecies board)))
-	)
+	(= 0 (count (board/open-indecies board))))
 
 (defn game-state [board check-quadrants]
 	(if (player-won board P1 check-quadrants)
@@ -86,7 +60,4 @@
 			:player2-won
 			(if (board-full? board)
 				:draw
-				:playing)
-			)
-		)
-	)
+				:playing))))
